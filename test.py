@@ -27,20 +27,23 @@ file.write('File Name \t')
 file.write('Time \t')
 file.write('\n')
 
-#todos
-#read through all the files
-
-
 
 #merge the data
-def merge (dataName):
-    print (dataName)
-    sys.exit('Lakuri Bhanjyang')
+def merge (folderName1, data):
     print ('into the merge')
-    oldDataset = os.path.join(rootPathOld, dataName)
-    newDataset = dataName
+    dataName = os.path.join(folderName1, data)
+    folderNameShp = folderName1 + '.shp'
+    newDataName = os.path.join(folderName1, folderNameShp)
+    oldDataset = os.path.join(rootPathOld, newDataName)
+    newDataset = os.path.join(rootPathData, dataName)
     filesToMerge = [newDataset, oldDataset]
-    fileTemporary = os.path.join(rootPathTemp, dataName)
+    fileTemporary = os.path.join(rootPathTemp, newDataName)
+    
+    #print('newDataName' + newDataName)
+    #print('oldDataset' + oldDataset)
+    #print('newDataset' + newDataset)
+    #print('Temporary ' + fileTemporary)
+    
     dataType = ''
     try:
         #merging datasets and storing at temp folder
@@ -63,18 +66,19 @@ def merge (dataName):
     arcpy.CopyFeatures_management(fileTemporary, outputFeatureClass)
 
     #copy the file in data folder to the Merged Folder
-    #todo
-    #create new folder datetime to copy the merged files inside
 
-    mergedFileName = dataName
+    mergedFileName = newDataName
     mergePath = rootPathMerged + "\Merged" + timeNowStr
 
-    
-    if not os.path.exists (mergePath):
-        os.makedirs(mergePath)    
+        
     
     mergedFile = os.path.join(mergePath,mergedFileName)
+    mergedFolder = os.path.join(mergePath,folderName1)
+    if not os.path.exists (mergedFolder):
+        os.makedirs(mergedFolder)
+        
     outputFeatureClass = mergedFile
+
     arcpy.CopyFeatures_management(newDataset, outputFeatureClass)
 
     #delete the file in data folder
@@ -86,11 +90,10 @@ def merge (dataName):
     arcpy.Delete_management(fileToDeleteTemp)
     
     #writing into the log file
-    file.write(fileTemporary)
+    file.write(newDataset)
     file.write('\t')
     file.write(timeNow)
     file.write('\n')
-    file.close()
     
    
     
@@ -110,12 +113,13 @@ def defineWgs(fc):
        print("Cant trasform to new projection")
 
 def mutmToWgs(fc):
+    #todo
     print ('transforming')
 
 
 for folder in folderList:
     url = os.path.join(rootPathData, folder)
-    
+    arcpy.env.workspace = url
         
     fcList = arcpy.ListFeatureClasses()
     for fc in fcList:
@@ -125,15 +129,16 @@ for folder in folderList:
         print name
         spatialReference = desc.spatialReference.name
         dataType = desc.dataType
-        #datumName = desc.GCS.datumName    
-        #print name
+
         if (spatialReference == 'Unknown') or (spatialReference == 'unknown'):
             defineWgs(name)
         elif (spatialReference == 'MUTM') or (spatialReference == 'mutm'):
             mutmToWgs(name)
         else:
             print ('data in same coordinate system')
-        merge(folder)
+        merge(folder,name)
+        print ('after merge')
+file.close()
 
         
     
