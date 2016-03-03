@@ -10,7 +10,7 @@ rootPathTemp = 'F:\\projects\EDMS_merge\Temp'
 rootPathOld = 'F:\\projects\EDMS_merge\old'
 rootPathData = 'F:\\projects\EDMS_merge\data'
 rootPathMerged = 'F:\\projects\EDMS_merge\merged'
-folders = ['canal', 'commandarea', 'conventionalgroundwaterprojects', 'conventionalsurfareprojects', 'deeptubewell', 'headworks', 'hydrologicalstation', 'meterologicalstation', 'riverbasin']
+folderList = ['canal', 'commandarea', 'conventionalgroundwaterprojects', 'conventionalsurfareprojects', 'deeptubewell', 'headworks', 'hydrologicalstation', 'meterologicalstation', 'riverbasin']
 
 
 #timeNow = time.ctime()
@@ -33,7 +33,9 @@ file.write('\n')
 
 
 #merge the data
-def merge (dataName):  
+def merge (dataName):
+    print (dataName)
+    sys.exit('Lakuri Bhanjyang')
     print ('into the merge')
     oldDataset = os.path.join(rootPathOld, dataName)
     newDataset = dataName
@@ -109,26 +111,29 @@ def defineWgs(fc):
 
 def mutmToWgs(fc):
     print ('transforming')
-        
-fcList = arcpy.ListFeatureClasses()
-i = 1
 
-for fc in fcList:
-    desc = arcpy.Describe(fc)
-    extend = desc.extent
-    name = desc.name
-    print name
-    spatialReference = desc.spatialReference.name
-    dataType = desc.dataType
-    #datumName = desc.GCS.datumName    
-    #print name
-    if (spatialReference == 'Unknown') or (spatialReference == 'unknown'):
-        defineWgs(name)
-    elif (spatialReference == 'MUTM') or (spatialReference == 'mutm'):
-        mutmToWgs(name)
-    else:
-        print ('data in same coordinate system')
-    merge(name)
+
+for folder in folderList:
+    url = os.path.join(rootPathData, folder)
+    
+        
+    fcList = arcpy.ListFeatureClasses()
+    for fc in fcList:
+        desc = arcpy.Describe(fc)
+        extend = desc.extent
+        name = desc.name
+        print name
+        spatialReference = desc.spatialReference.name
+        dataType = desc.dataType
+        #datumName = desc.GCS.datumName    
+        #print name
+        if (spatialReference == 'Unknown') or (spatialReference == 'unknown'):
+            defineWgs(name)
+        elif (spatialReference == 'MUTM') or (spatialReference == 'mutm'):
+            mutmToWgs(name)
+        else:
+            print ('data in same coordinate system')
+        merge(folder)
 
         
     
