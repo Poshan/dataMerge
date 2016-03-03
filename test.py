@@ -21,6 +21,7 @@ dateNow = time.strftime("%d-%m-%Y")
 timeNowStr = timeNow + '-' + dateNow
 textFileName = 'log-' + timeNowStr + '.txt'
 
+
 file = open(textFileName,'w')
 file.write('File Name \t')
 file.write('Time \t')
@@ -36,11 +37,11 @@ def merge (dataName):
     print ('into the merge')
     oldDataset = os.path.join(rootPathOld, dataName)
     newDataset = dataName
-    print (dataName)
     filesToMerge = [newDataset, oldDataset]
     fileTemporary = os.path.join(rootPathTemp, dataName)
     dataType = ''
     try:
+        #merging datasets and storing at temp folder
         arcpy.Merge_management(filesToMerge,fileTemporary,dataType)
         print ('data merged')
     except:
@@ -62,10 +63,15 @@ def merge (dataName):
     #copy the file in data folder to the Merged Folder
     #todo
     #create new folder datetime to copy the merged files inside
-    timeNow2 = int(time.time())
-    timeNow2Str = str(timeNow2)
-    mergedFileName = dataName + timeNow2Str
-    mergedFile = os.path.join(rootPathMerged,mergedFileName)
+
+    mergedFileName = dataName
+    mergePath = rootPathMerged + "\Merged" + timeNowStr
+
+    
+    if not os.path.exists (mergePath):
+        os.makedirs(mergePath)    
+    
+    mergedFile = os.path.join(mergePath,mergedFileName)
     outputFeatureClass = mergedFile
     arcpy.CopyFeatures_management(newDataset, outputFeatureClass)
 
@@ -101,18 +107,27 @@ def defineWgs(fc):
     except:
        print("Cant trasform to new projection")
 
-
+def mutmToWgs(fc):
+    print ('transforming')
+        
 fcList = arcpy.ListFeatureClasses()
 i = 1
+
 for fc in fcList:
     desc = arcpy.Describe(fc)
     extend = desc.extent
     name = desc.name
+    print name
     spatialReference = desc.spatialReference.name
     dataType = desc.dataType
+    #datumName = desc.GCS.datumName    
     #print name
     if (spatialReference == 'Unknown') or (spatialReference == 'unknown'):
         defineWgs(name)
+    elif (spatialReference == 'MUTM') or (spatialReference == 'mutm'):
+        mutmToWgs(name)
+    else:
+        print ('data in same coordinate system')
     merge(name)
 
         
