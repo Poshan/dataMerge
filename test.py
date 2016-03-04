@@ -16,8 +16,8 @@ folderList = ['canal', 'commandarea', 'conventionalgroundwaterprojects', 'conven
 #timeNow = time.ctime()
 #timeNow1 = int(time.time())
 #timeNowStr = str(timeNow1)
-timeNow = time.strftime("%H-%M-%S")
-dateNow = time.strftime("%d-%m-%Y")
+timeNow = time.strftime("%H_%M_%S")
+dateNow = time.strftime("%d_%m_%Y")
 timeNowStr = timeNow + '-' + dateNow
 textFileName = 'log-' + timeNowStr + '.txt'
 
@@ -30,6 +30,7 @@ file.write('\n')
 
 #merge the data
 def merge (folderName1, data):
+    timeNowStr = timeNow + '_' + dateNow
     print ('into the merge')
     dataName = os.path.join(folderName1, data)
     folderNameShp = folderName1 + '.shp'
@@ -67,17 +68,24 @@ def merge (folderName1, data):
 
     #copy the file in data folder to the Merged Folder
 
-    mergedFileName = newDataName
+    mergedFileName = dataName
     mergePath = rootPathMerged + "\Merged" + timeNowStr
 
         
-    
-    mergedFile = os.path.join(mergePath,mergedFileName)
     mergedFolder = os.path.join(mergePath,folderName1)
+    mergedFile = os.path.join(mergePath,mergedFileName)
+    
+    print mergedFolder
+    print mergedFile
+
     if not os.path.exists (mergedFolder):
         os.makedirs(mergedFolder)
-        
-    outputFeatureClass = mergedFile
+
+    tempFileName = timeNowStr + data
+    
+    outputFeatureClass = mergedFolder +'\Merged_' + tempFileName
+    print outputFeatureClass
+    
 
     arcpy.CopyFeatures_management(newDataset, outputFeatureClass)
 
@@ -115,6 +123,7 @@ def defineWgs(fc):
 def mutmToWgs(fc):
     #todo
     print ('transforming')
+    
 
 
 for folder in folderList:
