@@ -4,7 +4,7 @@ import os
 import sys
 import time
 
-#setting workspace
+#settings
 arcpy.env.workspace = 'F:\\projects\EDMS_merge\data'
 rootPathTemp = 'F:\\projects\EDMS_merge\Temp'
 rootPathOld = 'F:\\projects\EDMS_merge\old'
@@ -120,16 +120,19 @@ def defineWgs(fc):
     except:
        print("Cant trasform to new projection")
 
-def mutmToWgs(fc):
+def mutmToWgs(name):
     #todo
     print ('transforming')
+    projected_name = name + '_projected'
+    name_project = os.path.join(rootPathData, projected_name)
+    arcpy.Project_management(name, name_Project, "GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]]", "mutmToWgs", "PROJCS['Everest_Adj_1937_Transverse_Mercator',GEOGCS['GCS_Everest_Adj_1937',DATUM['D_Everest_Adj_1937',SPHEROID['Everest_Adjustment_1937',6377276.345,300.8017]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Transverse_Mercator'],PARAMETER['False_Easting',500000.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',84.0],PARAMETER['Scale_Factor',0.9999],PARAMETER['Latitude_Of_Origin',0.0],UNIT['Meter',1.0]]", "NO_PRESERVE_SHAPE", "")
+    print ('transformation completed')
     
 
 
 for folder in folderList:
     url = os.path.join(rootPathData, folder)
     arcpy.env.workspace = url
-        
     fcList = arcpy.ListFeatureClasses()
     for fc in fcList:
         desc = arcpy.Describe(fc)
@@ -141,11 +144,15 @@ for folder in folderList:
 
         if (spatialReference == 'Unknown') or (spatialReference == 'unknown'):
             defineWgs(name)
+            merge(folder,name)
         elif (spatialReference == 'MUTM') or (spatialReference == 'mutm'):
             mutmToWgs(name)
+            projected_name = name + '_projected'
+            merge(folder, projected_name)
+            
         else:
             print ('data in same coordinate system')
-        merge(folder,name)
+            merge(folder,name)
         print ('after merge')
 file.close()
 
